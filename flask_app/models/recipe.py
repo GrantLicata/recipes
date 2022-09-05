@@ -111,7 +111,6 @@ class Recipe:
     def get_by_id(cls,data):
         query = "SELECT * FROM recipes WHERE id = %(id)s;"
         result = connectToMySQL(cls.db).query_db(query,data)
-        print("-----<> Get_by_id result is:", result)
         if len(result) < 1:
             return False
         return cls(result[0])

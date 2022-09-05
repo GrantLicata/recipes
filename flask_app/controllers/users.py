@@ -59,5 +59,3 @@ def clear_session():
     session.clear()
     print(session)
     return render_template("login.html")
-
-### Entering website if session not empty
