@@ -64,33 +64,38 @@ class User:
             return False
         return cls(result[0])
 
-    # @staticmethod
-    # def validate_user(data):
-    #     is_valid = True
-    #     if len(data['first_name']) < 2:
-    #         flash("First name is required.")
-    #         is_valid = False
-    #     if len(data['last_name']) < 2:
-    #         flash("Last name is required.")
-    #         is_valid = False
-    #     # Check database to see if email already exists.
-    #     users = User.get_all()
-    #     for user in users:
-    #         if user.email == data['email']:
-    #             flash("Email already exists.")
-    #             is_valid = False
-    #     if len(data['email']) < 1:
-    #         flash("Email is required.")
-    #         is_valid = False
-    #     return is_valid
+    @staticmethod
+    def validate_user(data):
+        is_valid = True
 
-    # @staticmethod
-    # def validate_password(passwords):
-    #     is_valid = True
-    #     if passwords['password'] != passwords['confirm_password']:
-    #         flash("Passwords must be the same.")
-    #         is_valid = False
-    #     if len(passwords['password']) < 8:
-    #         flash("Passwords must be longer than 8 characters.")
-    #         is_valid = False
-    #     return is_valid
+        #First name validation
+        if len(data['first_name']) < 2:
+            flash("First name is required.")
+            is_valid = False
+
+        #Last name validation
+        if len(data['last_name']) < 2:
+            flash("Last name is required.")
+            is_valid = False
+
+        # Email validation
+        users = User.get_all()
+        for user in users:
+            if user.email == data['email']:
+                flash("Email already exists.")
+                is_valid = False
+        if len(data['email']) < 1:
+            flash("Email is required.")
+            is_valid = False
+        return is_valid
+
+    @staticmethod
+    def validate_password(passwords):
+        is_valid = True
+        if passwords['password'] != passwords['confirm_password']:
+            flash("Passwords must be the same.")
+            is_valid = False
+        if len(passwords['password']) < 8:
+            flash("Passwords must be longer than 8 characters.")
+            is_valid = False
+        return is_valid

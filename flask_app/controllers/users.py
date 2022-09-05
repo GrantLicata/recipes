@@ -25,10 +25,10 @@ def register():
         "password" : pw_hash
     }
     # Validations ---<>
-    # if not User.validate_user(data):
-    #     return redirect('/')
-    # if not User.validate_password(passwords):
-    #     return redirect('/')
+    if not User.validate_user(data):
+        return redirect('/')
+    if not User.validate_password(passwords):
+        return redirect('/')
     User.save(data)
     user_object = User.get_by_email(data)
     session['user_id'] = user_object.id
@@ -44,12 +44,12 @@ def login():
     user_in_db = User.get_by_email(data)
     print("This is the logged in user:", user_in_db.id)
     # Validations ---<>
-    # if not user_in_db:
-    #     flash("Invalid Email/Password")
-    #     return redirect("/")
-    # if not bcrypt.check_password_hash(user_in_db.password, request.form['password']):
-    #     flash("Invalid Email/Password")
-    #     return redirect('/')
+    if not user_in_db:
+        flash("Invalid Email/Password")
+        return redirect("/")
+    if not bcrypt.check_password_hash(user_in_db.password, request.form['password']):
+        flash("Invalid Email/Password")
+        return redirect('/')
     session['user_id'] = user_in_db.id
     return redirect("/recipes")
 
