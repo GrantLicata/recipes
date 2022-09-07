@@ -1,5 +1,5 @@
 from flask_app.config.mysqlconnection import connectToMySQL
-from flask import flash 
+from flask import flash, session
 import re
 
 # Validation schematics
@@ -19,7 +19,10 @@ class User:
 
     @classmethod
     def get_all(cls):
-        query = "SELECT * FROM users;"
+        query = """
+        SELECT * 
+        FROM users
+        ;"""
         results = connectToMySQL(cls.db).query_db(query)
         data = []
         for item in results:
@@ -28,9 +31,13 @@ class User:
 
     @classmethod
     def save(cls, data):
-        query = "INSERT INTO users (first_name, last_name, email, password ,created_at, updated_at) VALUES ( %(first_name)s , %(last_name)s , %(email)s , %(password)s, NOW() , NOW() );"
+        query = """
+        INSERT INTO users (first_name, last_name, email, password ,created_at, updated_at) 
+        VALUES ( %(first_name)s , %(last_name)s , %(email)s , %(password)s, NOW() , NOW() );"""
         result = connectToMySQL(cls.db).query_db( query, data )
+        session['user_id'] = result
         print(result)
+        print(session)
         return result
 
     @classmethod
@@ -87,15 +94,10 @@ class User:
         if len(data['email']) < 1:
             flash("Email is required.")
             is_valid = False
-        return is_valid
-
-    @staticmethod
-    def validate_password(passwords):
-        is_valid = True
-        if passwords['password'] != passwords['confirm_password']:
+        if data['password'] != data['confirm_password']:
             flash("Passwords must be the same.")
             is_valid = False
-        if len(passwords['password']) < 8:
+        if len(data['password']) < 8:
             flash("Passwords must be longer than 8 characters.")
             is_valid = False
         return is_valid
