@@ -1,5 +1,6 @@
 from flask import render_template, redirect, request, session, flash
 from flask_app import app
+from pprint import pprint
 from flask_app.models.recipe import Recipe
 from flask_app.models.user import User
 from flask_bcrypt import Bcrypt
@@ -11,7 +12,7 @@ def index():
 
 @app.route('/register', methods=["POST"])
 def register():
-    print(request.form)
+    pprint(request.form)
     if not User.validate_user(request.form): 
         return redirect('/')
     data = {
@@ -20,19 +21,17 @@ def register():
         "email": request.form["email"],
         "password" : bcrypt.generate_password_hash(request.form['password'])
     }
-    User.save(data)
+    session['user_id'] = User.save(data)
     return redirect('/recipes')
 
 ### loging In
 @app.route('/login', methods=['POST'])
 def login():
-    print(request.form)
+    print("---> This is the form data:", request.form)
     data = { 
         "email" : request.form["email"] 
         }
     user_in_db = User.get_by_email(data)
-    # print("This is the logged in user:", user_in_db.id)
-    # Validations ---<>
     if not user_in_db:
         flash("Invalid Email/Password")
         return redirect("/")

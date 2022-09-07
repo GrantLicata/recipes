@@ -31,13 +31,10 @@ class User:
 
     @classmethod
     def save(cls, data):
-        query = """
-        INSERT INTO users (first_name, last_name, email, password ,created_at, updated_at) 
+        query = """INSERT 
+        INTO users (first_name, last_name, email, password ,created_at, updated_at) 
         VALUES ( %(first_name)s , %(last_name)s , %(email)s , %(password)s, NOW() , NOW() );"""
         result = connectToMySQL(cls.db).query_db( query, data )
-        session['user_id'] = result
-        print(result)
-        print(session)
         return result
 
     @classmethod
@@ -74,18 +71,18 @@ class User:
     @staticmethod
     def validate_user(data):
         is_valid = True
-
         #First name validation
         if len(data['first_name']) < 2:
             flash("First name is required.")
             is_valid = False
-
         #Last name validation
         if len(data['last_name']) < 2:
             flash("Last name is required.")
             is_valid = False
-
         # Email validation
+        if not EMAIL_REGEX.match(data['email']): 
+            flash("Invalid email address!")
+            is_valid = False
         users = User.get_all()
         for user in users:
             if user.email == data['email']:
