@@ -39,6 +39,8 @@ def login():
         flash("Invalid Email/Password")
         return redirect('/')
     session['user_id'] = user_in_db.id
+    session['first_name'] = user_in_db.first_name
+    session['last_name'] = user_in_db.last_name
     return redirect("/recipes")
 
 ### Loging Out
@@ -47,3 +49,5 @@ def clear_session():
     session.clear()
     print(session)
     return render_template("login.html")
+
+

@@ -2,6 +2,7 @@ from flask import render_template, redirect, request, session, flash
 from flask_app import app
 from flask_app.models.recipe import Recipe
 from flask_app.models.user import User
+from pprint import pprint
 from flask_bcrypt import Bcrypt
 bcrypt = Bcrypt(app)
 
@@ -9,7 +10,7 @@ bcrypt = Bcrypt(app)
 def profile():
     if session == {} or False:
         return redirect('/')
-    list_of_recipes = Recipe.get_all_restructured()
+    list_of_recipes = Recipe.get_all_recipes_with_users()
     return render_template("table.html", all_recipes = list_of_recipes)
 
 @app.route("/recipes/new")
@@ -22,7 +23,7 @@ def edit_recipe(id):
         "id": id
     }
     selected_recipe = {}
-    recipe_object_list = Recipe.get_all()
+    recipe_object_list = Recipe.get_all_recipes_with_users()
     for recipe in recipe_object_list:
         if recipe.id == id:
             selected_recipe = recipe
@@ -32,11 +33,8 @@ def edit_recipe(id):
 
 @app.route("/recipes/card/<int:id>")
 def recipe_details(id):
-    data = {
-        "id": id
-    }
     selected_recipe = {}
-    recipe_object_list = Recipe.get_all()
+    recipe_object_list = Recipe.get_all_recipes_with_users()
     for recipe in recipe_object_list:
         if recipe.id == id:
             selected_recipe = recipe
@@ -96,3 +94,31 @@ def delete_recipe(id):
     print(data)
     Recipe.delete(data)
     return redirect('/recipes')
+
+@app.route('/recipe/new_favorite', methods=["POST"])
+def create_favorite():
+    data = {
+        "user_id": session["user_id"],
+        "recipe_id" : request.form["recipe_id"],
+        "id":session["user_id"]
+    }
+    User.new_favorite(data)
+    return redirect('/recipes')
+
+@app.route('/favorites')
+def favorites():
+    data = {
+        "id": session["user_id"]
+    }
+    user = User.get_all_users_with_favorites(data)
+    return render_template("favorites.html", favorites = user.favorites)
+
+@app.route('/favorite/delete', methods=["POST"])
+def delete_favorite():
+    data = {
+        "user_id": session["user_id"],
+        "recipe_id": request.form["favorite_id"]
+    }
+    print(data)
+    User.delete_favorite(data)
+    return redirect('/favorites')

@@ -33,12 +33,12 @@
     <div class="container w-75 mt-4 p-3">
 
         <!-- User Name -->
-        <h1 class="h1 mb-4">Welcome {{ recipe.posted_by.first_name }}!</h1>
+        <h1 class="h1 mb-4">Welcome {{ session["first_name"] }}!</h1>
 
         <!-- Recipe Header -->
         <div class="d-flex justify-content-between">
           <h2>{{ recipe.name }}</h2>
-          <h3>Posted by: {{ recipe.posted_by }}</h3>
+          <h3>Posted by: {{ recipe.posted_by.first_name }}</h3>
         </div>
 
         <!-- Card -->
@@ -63,6 +63,10 @@
                   </tr>
               </tbody>
             </table>
+          <form action="/recipe/new_favorite" method="post">
+            <input type="hidden" name="recipe_id" value="{{ recipe.id }}">
+            <button class="btn btn-success" type="submit">Favorite this Recipe</button>
+          </form>
         </div>
 
 

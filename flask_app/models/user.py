@@ -1,5 +1,7 @@
 from flask_app.config.mysqlconnection import connectToMySQL
-from flask import flash, session
+from flask_app.models import recipe
+from flask import flash
+from pprint import pprint
 import re
 
 # Validation schematics
@@ -16,18 +18,32 @@ class User:
         self.password = data['password'] 
         self.created_at = data['created_at']
         self.updated_at = data['updated_at']
+        self.favorites = []
 
     @classmethod
-    def get_all(cls):
-        query = """
-        SELECT * 
-        FROM users
+    def get_all_users_with_favorites(cls, data):
+        query = """SELECT * 
+        FROM users 
+        LEFT JOIN favorites ON favorites.user_id = users.id 
+        LEFT JOIN recipes ON favorites.recipe_id = recipes.id WHERE users.id = %(id)s
         ;"""
-        results = connectToMySQL(cls.db).query_db(query)
-        data = []
-        for item in results:
-            data.append( cls(item) )
-        return data
+        results = connectToMySQL(cls.db).query_db( query, data )
+        user = cls(results[0])
+        # pprint(results, sort_dicts=False, width=1)
+        for row in results:
+            recipe_data = {
+                "id": row['recipes.id'],
+                "name": row['name'],
+                "description": row['description'],
+                "instructions": row['instructions'],
+                "date_cooked": row['date_cooked'],
+                "under_30": row['under_30'],
+                "created_at": row['created_at'],
+                "updated_at": row['updated_at'],
+                "posted_by": None
+            }
+            user.favorites.append( recipe.Recipe(recipe_data) )
+        return user
 
     @classmethod
     def save(cls, data):
@@ -67,6 +83,21 @@ class User:
         if len(result) < 1:
             return False
         return cls(result[0])
+
+    @classmethod
+    def new_favorite(cls,data):
+        query = """INSERT 
+        INTO favorites (user_id, recipe_id) 
+        VALUES ( %(user_id)s , %(recipe_id)s );"""
+        result = connectToMySQL(cls.db).query_db( query, data )
+        return result
+
+    @classmethod
+    def delete_favorite(cls, data):
+        query = "DELETE FROM favorites WHERE (user_id = %(user_id)s AND recipe_id = %(recipe_id)s);"
+        print("This is the delete funcitons data:", data)
+        result = connectToMySQL(cls.db).query_db( query, data )
+        return result
 
     @staticmethod
     def validate_user(data):

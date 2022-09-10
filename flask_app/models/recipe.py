@@ -19,62 +19,26 @@ class Recipe:
         self.under_30 = data['under_30']
         self.created_at = data['created_at']
         self.updated_at = data['updated_at']
-        self.posted_by = ""
+        self.posted_by = None
 
     @classmethod
-    def get_all(cls):
-        query = "SELECT * FROM recipes JOIN users ON recipes.user_id = users.id;;"
+    def get_all_recipes_with_users(cls):
+        query = "SELECT * FROM recipes JOIN users ON recipes.user_id = users.id;"
         results = connectToMySQL(cls.db).query_db(query)
-        pprint(results)
         recipe_objects = []
-        for item in results:
-            data = {
-                "id": item["id"],
-                "name": item["name"],
-                "description" : item["description"],
-                "instructions": item["instructions"],
-                "date_cooked": item["date_cooked"],
-                "under_30": item["under_30"],
-                "user_id": item["user_id"],
-                "created_at": item["created_at"],
-                "updated_at": item["updated_at"]
-            }
-            new_object = cls(data)
-            new_object.posted_by = item["first_name"] + " " + item["last_name"]
-            recipe_objects.append( new_object )
-            print("These are the new recipe objects: ---------", recipe_objects)
-        return recipe_objects
-
-    @classmethod
-    def get_all_restructured(cls):
-        query = "SELECT * FROM recipes JOIN users ON recipes.user_id = users.id;;"
-        results = connectToMySQL(cls.db).query_db(query)
-        print(results)
-        recipe_objects = []
-        for item in results:
-            recipe_data = {
-                'id': item["id"],
-                'name': item["name"],
-                'instructions': item["instructions"], 
-                'description': item["description"],
-                'date_cooked': item["date_cooked"],
-                'under_30': item["under_30"],
-                'created_at': item["created_at"],
-                'updated_at': item["updated_at"]
-            }
+        for row in results:
+            recipe_object = cls(row)
             user_data = {
-                'id': item["users.id"],
-                'first_name': item["first_name"],
-                'last_name': item["last_name"],
-                'password': item["password"],
-                'email': item["email"],
-                'created_at': item["users.created_at"],
-                'updated_at': item["users.updated_at"]
+                'id': row["user_id"],
+                'first_name': row["first_name"],
+                'last_name': row["last_name"],
+                'password': row["password"],
+                'email': row["email"],
+                'created_at': row["users.created_at"],
+                'updated_at': row["users.updated_at"]
             }
-            recipe_object = Recipe(recipe_data)
             recipe_object.posted_by = user.User(user_data)
             recipe_objects.append( recipe_object )
-            print("These are the new recipe objects: --------->", recipe_objects)
         return recipe_objects
 
     @classmethod
