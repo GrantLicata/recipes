@@ -79,8 +79,6 @@ class Recipe:
             return False
         return cls(result[0])
 
-
-
     @staticmethod
     def validate_recipe(data):
         is_valid = True

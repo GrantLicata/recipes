@@ -18,7 +18,34 @@ class User:
         self.password = data['password'] 
         self.created_at = data['created_at']
         self.updated_at = data['updated_at']
-        self.favorites = []
+        self.recipes = []
+        self.favorites = [] 
+
+    # IN-PROGRESS!!
+    @classmethod
+    def get_all_users_with_recipes(cls, data):
+        query = """SELECT * 
+        FROM users 
+        JOIN recipes 
+        ON recipes.user_id = users.id WHERE users.id = %(id)s
+        ;"""
+        results = connectToMySQL(cls.db).query_db( query, data )
+        user = cls(results[0])
+        # pprint(results, sort_dicts=False, width=1)
+        for row in results:
+            recipe_data = {
+                "id": row['recipes.id'],
+                "name": row['name'],
+                "description": row['description'],
+                "instructions": row['instructions'],
+                "date_cooked": row['date_cooked'],
+                "under_30": row['under_30'],
+                "created_at": row['created_at'],
+                "updated_at": row['updated_at'],
+                "posted_by": None
+            }
+            user.recipes.append( recipe.Recipe(recipe_data) )
+        return user
 
     @classmethod
     def get_all_users_with_favorites(cls, data):

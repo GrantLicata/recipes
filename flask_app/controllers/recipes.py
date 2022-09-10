@@ -122,3 +122,11 @@ def delete_favorite():
     print(data)
     User.delete_favorite(data)
     return redirect('/favorites')
+
+@app.route('/my_recipes')
+def my_recipes():
+    data = {
+        "id": session["user_id"]
+    }
+    user = User.get_all_users_with_recipes(data)
+    return render_template("my_recipes.html", my_recipes = user.recipes)
