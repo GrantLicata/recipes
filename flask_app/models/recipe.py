@@ -19,27 +19,104 @@ class Recipe:
         self.under_30 = data['under_30']
         self.created_at = data['created_at']
         self.updated_at = data['updated_at']
-        self.posted_by = None
+        self.users_who_favorited = []
+        self.user_ids_who_favorited = []
+        self.author = None
 
+    # ||| Multi Join Tables n:n ||| -> This should be stored within the many side of models and accompanied by class attributes of:
+    # "self.users_who_liked = []"
+    # "self.user_ids_who_liked = []"
+    # "self.author = None" 
+    # With these in place, you are now capable of gathering all the data needed.Cascase must be turned on for the Users side in the ERD.
     @classmethod
-    def get_all_recipes_with_users(cls):
-        query = "SELECT * FROM recipes JOIN users ON recipes.user_id = users.id;"
+    def get_all(cls):
+        query = """SELECT * FROM recipes JOIN users AS authors ON recipes.user_id = authors.id
+        LEFT JOIN favorites ON recipes.id = favorites.recipe_id
+        LEFT JOIN users AS users_who_favorited ON favorites.user_id = users_who_favorited.id
+        ;"""
         results = connectToMySQL(cls.db).query_db(query)
-        recipe_objects = []
+        recipes = []
         for row in results:
-            recipe_object = cls(row)
-            user_data = {
-                'id': row["user_id"],
-                'first_name': row["first_name"],
-                'last_name': row["last_name"],
-                'password': row["password"],
-                'email': row["email"],
-                'created_at': row["users.created_at"],
-                'updated_at': row["users.updated_at"]
+            new_recipe = True
+            user_who_liked_data = {
+                'id': row['users_who_favorited.id'],
+                'first_name': row['users_who_favorited.first_name'],
+                'last_name': row['users_who_favorited.last_name'],
+                'email': row['users_who_favorited.email'],
+                'password': row['users_who_favorited.password'],
+                'created_at': row['users_who_favorited.created_at'],
+                'updated_at': row['users_who_favorited.updated_at']
             }
-            recipe_object.posted_by = user.User(user_data)
-            recipe_objects.append( recipe_object )
-        return recipe_objects
+            number_of_recipes = len(recipes)
+            if number_of_recipes > 0:
+                last_recipe = recipes[number_of_recipes - 1]
+                if last_recipe.id == row['id']:
+                    last_recipe.user_ids_who_favorited.append(row['users_who_favorited.id'])
+                    last_recipe.users_who_favorited.append(user.User(user_who_liked_data))
+                    new_recipe = False
+            if new_recipe:
+                recipe = cls(row)
+                user_data = {
+                    'id': row['authors.id'],
+                    'first_name': row['first_name'],
+                    'last_name': row['last_name'],
+                    'email': row['email'],
+                    'password': row['password'],
+                    'created_at': row['created_at'],
+                    'updated_at': row['updated_at']
+                }
+                recipe.author = user.User(user_data)
+                if row['users_who_favorited.id']:
+                    recipe.user_ids_who_favorited.append(row['users_who_favorited.id'])
+                    recipe.users_who_favorited.append(user.User(user_who_liked_data))
+                recipes.append(recipe)
+        return recipes
+
+# ||| Review the video to make all necessary adjustments to the get one method before using it to better display the recipe card within the applicaiton.
+    @classmethod
+    def get_one(cls, data):
+        query = """SELECT * FROM recipes JOIN users AS authors ON recipes.user_id = authors.id
+        LEFT JOIN favorites ON recipes.id = favorites.recipe_id
+        LEFT JOIN users AS users_who_favorited ON favorites.user_id = users_who_favorited.id
+        WHERE recipe.id = %(id)s
+        ;"""
+        results = connectToMySQL(cls.db).query_db(query, data)
+        recipes = []
+        for row in results:
+            new_recipe = True
+            user_who_liked_data = {
+                'id': row['users_who_favorited.id'],
+                'first_name': row['users_who_favorited.first_name'],
+                'last_name': row['users_who_favorited.last_name'],
+                'email': row['users_who_favorited.email'],
+                'password': row['users_who_favorited.password'],
+                'created_at': row['users_who_favorited.created_at'],
+                'updated_at': row['users_who_favorited.updated_at']
+            }
+            number_of_recipes = len(recipes)
+            if number_of_recipes > 0:
+                last_recipe = recipes[number_of_recipes - 1]
+                if last_recipe.id == row['id']:
+                    last_recipe.user_ids_who_favorited.append(row['users_who_favorited.id'])
+                    last_recipe.users_who_favorited.append(user.User(user_who_liked_data))
+                    new_recipe = False
+            if new_recipe:
+                recipe = cls(row)
+                user_data = {
+                    'id': row['authors.id'],
+                    'first_name': row['first_name'],
+                    'last_name': row['last_name'],
+                    'email': row['email'],
+                    'password': row['password'],
+                    'created_at': row['created_at'],
+                    'updated_at': row['updated_at']
+                }
+                recipe.author = user.User(user_data)
+                if row['users_who_favorited.id']:
+                    recipe.user_ids_who_favorited.append(row['users_who_favorited.id'])
+                    recipe.users_who_favorited.append(user.User(user_who_liked_data))
+                recipes.append(recipe)
+        return recipes
 
     @classmethod
     def save(cls, data):

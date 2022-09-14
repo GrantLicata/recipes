@@ -21,7 +21,6 @@ class User:
         self.recipes = []
         self.favorites = [] 
 
-    # IN-PROGRESS!!
     @classmethod
     def get_all_users_with_recipes(cls, data):
         query = """SELECT * 
@@ -156,3 +155,6 @@ class User:
             flash("Passwords must be longer than 8 characters.")
             is_valid = False
         return is_valid
+
+
+    

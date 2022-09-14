@@ -10,7 +10,7 @@ bcrypt = Bcrypt(app)
 def profile():
     if session == {} or False:
         return redirect('/')
-    list_of_recipes = Recipe.get_all_recipes_with_users()
+    list_of_recipes = Recipe.get_all()
     return render_template("table.html", all_recipes = list_of_recipes)
 
 @app.route("/recipes/new")
@@ -23,7 +23,7 @@ def edit_recipe(id):
         "id": id
     }
     selected_recipe = {}
-    recipe_object_list = Recipe.get_all_recipes_with_users()
+    recipe_object_list = Recipe.get_all()
     for recipe in recipe_object_list:
         if recipe.id == id:
             selected_recipe = recipe
@@ -34,7 +34,7 @@ def edit_recipe(id):
 @app.route("/recipes/card/<int:id>")
 def recipe_details(id):
     selected_recipe = {}
-    recipe_object_list = Recipe.get_all_recipes_with_users()
+    recipe_object_list = Recipe.get_all()
     for recipe in recipe_object_list:
         if recipe.id == id:
             selected_recipe = recipe

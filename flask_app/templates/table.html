@@ -56,14 +56,14 @@
                 <tr>
                     <td>{{ recipe.name }}</td>
                     <td>{{ recipe.under_30 }}</td>
-                    <td>{{ recipe.posted_by.first_name }} {{ recipe.posted_by.last_name }}</td>
+                    <td>{{ recipe.author.first_name }} {{ recipe.author.last_name }}</td>
                     <td>
                       <!-- Buttons -->
                       <div class="container d-flex p-0">
                         <form action="/recipes/card/{{ recipe.id }}">
                           <button type="submit" class="btn btn-link p-0 pe-1">View Recipe</button> 
                         </form>
-                        {% if session["user_id"] == recipe.posted_by.id %}
+                        {% if session["user_id"] == recipe.author.id %}
                         <form action="/recipes/edit/{{ recipe.id }}">
                           | <button type="submit" class="btn btn-link p-0 ps-1 pe-1">Edit</button> |
                         </form>
