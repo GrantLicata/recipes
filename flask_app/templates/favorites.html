@@ -59,8 +59,9 @@
                         <form action="/recipes/card/{{ favorite.id }}" method="get">
                             <button type="submit" class="btn btn-primary p-0 pe-1 me-1">View Recipe</button> 
                         </form>
-                        <form action="/favorite/delete" method="post">
-                            <input type="hidden" name="favorite_id" value="{{ favorite.id }}">
+                        <form action="/favorite/delete/favorites" method="post">
+                            <input type="hidden" name="recipe_id" value="{{ favorite.id }}">
+                            <input type="hidden" name="user_id" value="{{ session['user_id'] }}">
                             {% if favorite.name != None %}
                             | <button type="submit" class="btn btn-danger p-0 px-1">Remove</button>
                             {% endif %}

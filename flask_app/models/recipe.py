@@ -30,7 +30,8 @@ class Recipe:
     # With these in place, you are now capable of gathering all the data needed.Cascase must be turned on for the Users side in the ERD.
     @classmethod
     def get_all(cls):
-        query = """SELECT * FROM recipes JOIN users AS authors ON recipes.user_id = authors.id
+        query = """SELECT * FROM recipes 
+        JOIN users AS authors ON recipes.user_id = authors.id
         LEFT JOIN favorites ON recipes.id = favorites.recipe_id
         LEFT JOIN users AS users_who_favorited ON favorites.user_id = users_who_favorited.id
         ;"""
@@ -75,31 +76,18 @@ class Recipe:
 # ||| Review the video to make all necessary adjustments to the get one method before using it to better display the recipe card within the applicaiton.
     @classmethod
     def get_one(cls, data):
-        query = """SELECT * FROM recipes JOIN users AS authors ON recipes.user_id = authors.id
+        query = """SELECT * FROM recipes 
+        JOIN users AS authors ON recipes.user_id = authors.id
         LEFT JOIN favorites ON recipes.id = favorites.recipe_id
         LEFT JOIN users AS users_who_favorited ON favorites.user_id = users_who_favorited.id
-        WHERE recipe.id = %(id)s
+        WHERE recipes.id = %(id)s
         ;"""
         results = connectToMySQL(cls.db).query_db(query, data)
-        recipes = []
+        if len(results) < 1:
+            return False
+
+        new_recipe = True
         for row in results:
-            new_recipe = True
-            user_who_liked_data = {
-                'id': row['users_who_favorited.id'],
-                'first_name': row['users_who_favorited.first_name'],
-                'last_name': row['users_who_favorited.last_name'],
-                'email': row['users_who_favorited.email'],
-                'password': row['users_who_favorited.password'],
-                'created_at': row['users_who_favorited.created_at'],
-                'updated_at': row['users_who_favorited.updated_at']
-            }
-            number_of_recipes = len(recipes)
-            if number_of_recipes > 0:
-                last_recipe = recipes[number_of_recipes - 1]
-                if last_recipe.id == row['id']:
-                    last_recipe.user_ids_who_favorited.append(row['users_who_favorited.id'])
-                    last_recipe.users_who_favorited.append(user.User(user_who_liked_data))
-                    new_recipe = False
             if new_recipe:
                 recipe = cls(row)
                 user_data = {
@@ -112,11 +100,20 @@ class Recipe:
                     'updated_at': row['updated_at']
                 }
                 recipe.author = user.User(user_data)
-                if row['users_who_favorited.id']:
-                    recipe.user_ids_who_favorited.append(row['users_who_favorited.id'])
-                    recipe.users_who_favorited.append(user.User(user_who_liked_data))
-                recipes.append(recipe)
-        return recipes
+                new_recipe = True
+            if row['users_who_favorited.id']:
+                user_who_liked_data = {
+                    'id': row['users_who_favorited.id'],
+                    'first_name': row['users_who_favorited.first_name'],
+                    'last_name': row['users_who_favorited.last_name'],
+                    'email': row['users_who_favorited.email'],
+                    'password': row['users_who_favorited.password'],
+                    'created_at': row['users_who_favorited.created_at'],
+                    'updated_at': row['users_who_favorited.updated_at']
+                }
+                recipe.users_who_favorited.append(user.User(user_who_liked_data))
+                recipe.user_ids_who_favorited.append(row['users_who_favorited.id'])
+        return recipe
 
     @classmethod
     def save(cls, data):

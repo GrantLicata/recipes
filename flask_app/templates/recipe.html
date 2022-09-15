@@ -69,10 +69,17 @@
                   </tr>
               </tbody>
             </table>
-          <form action="/recipe/new_favorite" method="post">
+          {% if session["user_id"] in recipe.user_ids_who_favorited %}
+          <form action="/favorite/delete" method="post">
             <input type="hidden" name="recipe_id" value="{{ recipe.id }}">
-            <button class="btn btn-success" type="submit">Favorite this Recipe</button>
+            <button class="btn btn-danger" type="submit">Remove from Favorites</button>
           </form>
+          {% else %}
+          <form action="/favorite/add" method="post">
+            <input type="hidden" name="recipe_id" value="{{ recipe.id }}">
+            <button class="btn btn-success" type="submit">Add to Favorites</button>
+          </form>
+          {% endif %}
         </div>
 
 

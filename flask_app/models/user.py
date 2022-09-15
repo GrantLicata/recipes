@@ -22,7 +22,7 @@ class User:
         self.favorites = [] 
 
     @classmethod
-    def get_all_users_with_recipes(cls, data):
+    def get_one_with_recipes(cls, data):
         query = """SELECT * 
         FROM users 
         JOIN recipes 
@@ -47,7 +47,7 @@ class User:
         return user
 
     @classmethod
-    def get_all_users_with_favorites(cls, data):
+    def get_one_with_favorites(cls, data):
         query = """SELECT * 
         FROM users 
         LEFT JOIN favorites ON favorites.user_id = users.id 
